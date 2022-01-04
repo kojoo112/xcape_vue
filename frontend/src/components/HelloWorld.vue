@@ -1,58 +1,164 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router" target="_blank" rel="noopener">router</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <b-card bg-variant="dark" header="XCAPE Hint Setting" text-variant="white" class="text-center">
+      <b-container>
+        <b-row>
+          <b-col>
+            <b-input-group size="md" prepend="가맹점">
+              <b-form-select id="merchant" @change="getThemeList()" v-model="defaultMerchantCode">
+                <option v-for="(data, index) in merchantList" :key="index" :value="data.merchant_code">
+                  {{ data.merchant_name }}
+                </option>
+              </b-form-select>
+            </b-input-group>
+            <!-- <span>{{ selected }}</span> -->
+          </b-col>
+          <b-col>
+            <b-input-group size="md" prepend="테마">
+              <b-form-select id="theme" @change="getHintList()" v-model="defaultThemeCode">
+                <option v-for="(data, index) in themeList" :key="index" :value="data.theme_code">
+                  {{ data.theme_name }}
+                </option>
+              </b-form-select>
+            </b-input-group>
+          </b-col>
+          <b-col>
+            <b-input-group size="md" prepend="번호">
+              <b-form-input></b-form-input>
+            </b-input-group>
+          </b-col>
+        </b-row>
+        <b-row>
+          <b-col>
+            <b-input-group size="md" prepend="힌트1">
+              <b-form-input></b-form-input>
+            </b-input-group>
+          </b-col>
+          <b-col>
+            <b-input-group size="md" prepend="힌트2">
+              <b-form-input></b-form-input>
+            </b-input-group>
+          </b-col>
+        </b-row>
+      </b-container>
+      <div><button>저장</button></div>
+    </b-card>
+    <!-- <select id="merchant" @change="getThemeList()">
+      <option v-for="(data, index) in merchantList" :key="index" :value="data.merchant_code">
+        
+      </option>
+    </select>
+    <br />
+    <select id="theme" @change="getHintList()">
+      <option v-for="(data, index) in themeList" :key="index" :value="data.theme_code">
+        
+      </option>
+    </select> -->
+
+    <div>{{ res }}</div>
+    <div>{{ defaultMerchantCode }}</div>
+    <div>{{ defaultThemeCode }}</div>
+    <div>{{ hintList }}</div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
-</script>
+  created: function () {
+    this.getMerchantList();
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
+    // this.$http
+    //   .get("/api/merchant/list")
+    //   .then((res) => {
+    //     this.merchantList = res.data;
+    //   })
+    //   .then(() => {
+    //     this.getThemeList();
+    //   })
+    //   .catch((err) => {
+    //     console.error(err);
+    //   });
+  },
+  name: "HelloWorld",
+  data() {
+    return {
+      defaultMerchantCode: "",
+      defaultThemeCode: "THM001",
+      merchantList: [],
+      themeList: [],
+      hintList: "",
+      res: "",
+    };
+  },
+  methods: {
+    getMerchantList: async function () {
+      await this.$http
+        .get("/api/merchant/list")
+        .then((res) => {
+          this.merchantList = res.data;
+          this.defaultMerchantCode = res.data[0].merchant_code;
+        })
+        .then(() => {
+          this.getThemeList();
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    },
+    getThemeList: function () {
+      this.$http
+        .get("/api/theme/list", {
+          params: {
+            merchantCode: $("#merchant").val(),
+          },
+        })
+        .then((res) => {
+          this.themeList = res.data;
+          this.defaultThemeCode = res.data[0].theme_code;
+        })
+        .then(() => {
+          this.getHintList();
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    },
+    getHintList: function () {
+      this.$http
+        .get("/api/hint/list", {
+          params: {
+            merchantCode: $("#merchant").val(),
+            themeCode: $("#theme").val(),
+          },
+        })
+        .then((res) => {
+          // console.log("getHintList");
+          this.hintList = res.data;
+        });
+    },
+  },
+};
+</script>
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+.card {
+  background-color: red;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+.card-header {
+  background-color: #252525;
+  font-size: 40px;
+  font-weight: bold;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+
+.card-body {
+  background-color: #252525;
+  display: flex;
 }
-a {
-  color: #42b983;
+
+.input-group-text {
+  width: 150px;
+  background-color: #343a40;
+  color: white;
+  font-weight: bold;
 }
 </style>
+<!-- Add "scoped" attribute to limit CSS to this component only -->

@@ -73,7 +73,7 @@ bower_components
 build/Release
 
 # Dependency directories
-./node_modules/
+node_modules
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
@@ -199,3 +199,5 @@ npm-debug.log
 yarn-error.log
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node,visualstudiocode,vue,vuejs
+
+config/database.js
